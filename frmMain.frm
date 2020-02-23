@@ -89,7 +89,7 @@ Begin VB.Form frmMain
       End
       Begin VB.Menu mnuGameExit 
          Caption         =   "E&xit"
-         Shortcut        =   ^X
+         Shortcut        =   ^Q
       End
    End
    Begin VB.Menu mnuCheats 

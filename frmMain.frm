@@ -33,6 +33,13 @@ Begin VB.Form frmMain
          EndProperty
       EndProperty
    End
+   Begin VB.Image imgExplosion 
+      Height          =   615
+      Left            =   1320
+      Top             =   720
+      Visible         =   0   'False
+      Width           =   615
+   End
    Begin VB.Label lblGameOver 
       Alignment       =   2  'Center
       BackColor       =   &H00808000&
@@ -123,6 +130,8 @@ Dim iColWidth As Integer
 
 Dim shownCongrats As Boolean
 
+Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
+
     
 Private Sub Form_Activate()
     
@@ -184,7 +193,25 @@ Private Sub InitWindow()
     For i = 1 To cells * cells
         Load lblTile(i)
     Next i
+    
+    imgExplosion.Picture = LoadResPicture(101, vbResIcon)
+    imgExplosion.Width = iRowHeight
+    imgExplosion.Height = iRowHeight
+    imgExplosion.Stretch = True
+    
 End Sub
+
+Sub ShowExplosion(x As Integer, y As Integer)
+    imgExplosion.Left = marginLeft + x * iColWidth
+    imgExplosion.Top = marginTop + y * iRowHeight
+    imgExplosion.Visible = True
+    ' uh oh this is terrible
+    DoEvents
+    Sleep (200)
+    DoEvents
+    imgExplosion.Visible = False
+End Sub
+
 Private Sub InitGame()
     ReDim gameCells(cells - 1, cells - 1) As Integer
     
@@ -383,3 +410,4 @@ Private Sub tAutoplay_Timer()
     Call GameStep(gameCells, Directions.Left)
     Call GameStep(gameCells, Directions.Up)
 End Sub
+

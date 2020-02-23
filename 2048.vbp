@@ -6,6 +6,7 @@ Form=frmLog.frm
 Module=Logging; Logging.bas
 Module=Mechanics; Mechanics.bas
 Class=Tile; Tile.cls
+ResFile32="\\VBOXSVR\Public\2048\Game2048.RES"
 IconForm="frmMain"
 Startup="frmMain"
 HelpFile=""

@@ -16,4 +16,4 @@ The easiest way to run this game is to grab a compiled copy from the
 of course, you could also clone this repository and open the project
 file (`2048.vbp`) in Microsoft Visual Basic 6.
 
-[users-of-2048]: ./img/2048-in-use.jpg "Users of 2048"
+[users-of-2048]: ./img/2048-in-use.jpg "A father and son excitedly install 2048 after receiving their boxed CD-ROM delivery!"

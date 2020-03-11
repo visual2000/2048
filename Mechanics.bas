@@ -105,7 +105,6 @@ Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, stepX
                         'double ourselves and blank them!
                         gameCells(x, y) = gameCells(x, y) * 2
                         gameCells(x + dx, y + dy) = 0
-                        Call frmMain.ShowExplosion(x, y)
                         ' apply gravity on the remainder of this row
                         Call ApplyGravity(gameCells, dx, dy, stepX, stepY, x + dx, y + dy, endX, y + dy)
                         didWeMerge = True

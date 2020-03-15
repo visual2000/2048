@@ -105,12 +105,12 @@ Dim shownCongrats As Boolean
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
 Private Sub Form_Activate()
-    Dim animationsteps As Collection
-    Set animationsteps = New Collection
+    Dim animationSteps As Collection
+    Set animationSteps = New Collection
     
     Call addLog("frmMain Form_Activate()")
     
-    Call DrawTiles(animationsteps)
+    Call DrawTiles(animationSteps)
     
     frmMain.SetFocus
     
@@ -207,7 +207,7 @@ Private Sub InitGame()
     
 End Sub
 
-Sub DrawTiles(animationsteps As Collection)
+Sub DrawTiles(animationSteps As Collection)
     ''' Populate the grid with tiles having potentially some info.
     Dim iRow As Integer
     Dim iCol As Integer
@@ -221,13 +221,18 @@ Sub DrawTiles(animationsteps As Collection)
     Dim startY As Integer
     
     For animationFrame = 1 To animationFPS
-        For Each animationStep In animationsteps
-            idx = (animationStep.x - animationStep.dx) + cells * (animationStep.y - animationStep.dy)
-            imgTile(idx).Left = imgTile(idx).Left + (1# / animationFPS) * iColWidth * animationStep.dx
-            imgTile(idx).Top = imgTile(idx).Top + (1# / animationFPS) * iRowHeight * animationStep.dy
-            Sleep 1000 / animationFPS
+        For Each animationStep In animationSteps
+            If Not animationStep.amIaMerge Then
+                idx = animationStep.startX + cells * animationStep.startY
+                imgTile(idx).ZOrder (0)
+                imgTile(idx).Left = imgTile(idx).Left + (1# / animationFPS) * iColWidth * (animationStep.endX - animationStep.startX)
+                imgTile(idx).Top = imgTile(idx).Top + (1# / animationFPS) * iRowHeight * (animationStep.endY - animationStep.startY)
+                Sleep 200 / animationFPS
+            End If
         Next animationStep
     Next animationFrame
+    
+    
     
         
     For iRow = 0 To cells - 1
@@ -301,7 +306,7 @@ End Sub
 
 Private Sub mnuGameNew_Click()
     Call InitGame
-    Call DrawTiles
+    Call DrawTiles(New Collection)
 End Sub
 
 

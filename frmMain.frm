@@ -104,12 +104,13 @@ Dim shownCongrats As Boolean
 
 Private Declare Sub Sleep Lib "kernel32" (ByVal dwMilliseconds As Long)
 
-    
 Private Sub Form_Activate()
+    Dim animationsteps As Collection
+    Set animationsteps = New Collection
     
     Call addLog("frmMain Form_Activate()")
     
-    Call DrawTiles
+    Call DrawTiles(animationsteps)
     
     frmMain.SetFocus
     
@@ -206,15 +207,34 @@ Private Sub InitGame()
     
 End Sub
 
-Sub DrawTiles()
+Sub DrawTiles(animationsteps As Collection)
     ''' Populate the grid with tiles having potentially some info.
     Dim iRow As Integer
     Dim iCol As Integer
     Dim idx As Integer
+    
+    Dim animationStep As animationStep
+    Dim animationFrame As Integer
+    Dim animationFPS As Integer
+    animationFPS = 5
+    Dim startX As Integer
+    Dim startY As Integer
+    
+    For animationFrame = 1 To animationFPS
+        For Each animationStep In animationsteps
+            idx = (animationStep.x - animationStep.dx) + cells * (animationStep.y - animationStep.dy)
+            imgTile(idx).Left = imgTile(idx).Left + (1# / animationFPS) * iColWidth * animationStep.dx
+            imgTile(idx).Top = imgTile(idx).Top + (1# / animationFPS) * iRowHeight * animationStep.dy
+            Sleep 1000 / animationFPS
+        Next animationStep
+    Next animationFrame
+    
         
     For iRow = 0 To cells - 1
         For iCol = 0 To cells - 1
             idx = iCol + cells * iRow
+            imgTile(idx).Left = iCol * iColWidth
+            imgTile(idx).Top = iRow * iRowHeight
             imgTile(idx).Picture = LoadResPicture(CellResourceId(gameCells(iCol, iRow)), vbResBitmap)
         Next iCol
     Next iRow

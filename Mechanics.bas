@@ -57,13 +57,15 @@ Function GetEmptyCells(gameCells() As Integer) As Collection
     Set GetEmptyCells = empties
 End Function
 
-
-Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, stepX As Integer, stepY As Integer, startX As Integer, startY As Integer, endX As Integer, endY As Integer) As Boolean
+Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, stepX As Integer, stepY As Integer, startX As Integer, startY As Integer, endX As Integer, endY As Integer) As Collection
     
     Dim x As Integer, y As Integer
     Dim needToContinueLoop As Boolean
     Dim weDidAnythingAtAll As Boolean
     weDidAnythingAtAll = False
+    Dim a As animationStep
+    Dim animationsteps As Collection
+    Set animationsteps = New Collection
     
     Do
         needToContinueLoop = False
@@ -81,6 +83,13 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
                             needToContinueLoop = True
                             weDidAnythingAtAll = True
                         End If
+                        ' Send a list of proposed moves back to the form
+                        Set a = New animationStep
+                        a.x = x
+                        a.y = y
+                        a.dx = totalDx
+                        a.dy = totalDy
+                        animationsteps.Add a
                     End If
                 End If
                 ' if we're not empty we're done, skip ahead
@@ -88,7 +97,7 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
         Next y
     Loop While needToContinueLoop
     
-    ApplyGravity = weDidAnythingAtAll
+    Set ApplyGravity = animationsteps
 End Function
 
 Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, stepX As Integer, stepY As Integer, startX As Integer, startY As Integer, endX As Integer, endY As Integer) As Boolean
@@ -199,14 +208,15 @@ Sub GameStep(gameCells() As Integer, direction As Directions)
         End If
     End If
     
-    Dim didGravityMove As Boolean, didMergeMove As Boolean
-    didGravityMove = ApplyGravity(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
+    Dim didGravityMove As Boolean, didMergeMove As Boolean, animationsteps As Collection
+    Set animationsteps = ApplyGravity(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
+    didGravityMove = animationsteps.Count > 0
     didMergeMove = ApplyMerges(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
     
     If didMergeMove Or didGravityMove Or frmMain.mnuCheatAlwaysGive.Checked Then
         Call RandomlyPlace2Or4(gameCells)
     End If
     
-    Call frmMain.DrawTiles
+    Call frmMain.DrawTiles(animationsteps)
     Call frmMain.UpdateScore
 End Sub

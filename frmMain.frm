@@ -1,15 +1,29 @@
 VERSION 5.00
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
 Begin VB.Form frmMain 
+   AutoRedraw      =   -1  'True
    Caption         =   "2048"
    ClientHeight    =   5595
    ClientLeft      =   165
    ClientTop       =   735
    ClientWidth     =   7875
    LinkTopic       =   "Form1"
-   ScaleHeight     =   5595
-   ScaleWidth      =   7875
+   ScaleHeight     =   373
+   ScaleMode       =   3  'Pixel
+   ScaleWidth      =   525
    StartUpPosition =   3  'Windows Default
+   Begin VB.PictureBox pb 
+      AutoRedraw      =   -1  'True
+      Height          =   1455
+      Left            =   1200
+      ScaleHeight     =   93
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   93
+      TabIndex        =   1
+      Top             =   480
+      Visible         =   0   'False
+      Width           =   1455
+   End
    Begin VB.Timer tAutoplay 
       Enabled         =   0   'False
       Interval        =   100
@@ -32,34 +46,6 @@ Begin VB.Form frmMain
          BeginProperty Panel1 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
          EndProperty
       EndProperty
-   End
-   Begin VB.Label lblGameOver 
-      Alignment       =   2  'Center
-      BackColor       =   &H00808000&
-      Caption         =   "Game over!"
-      BeginProperty Font 
-         Name            =   "MS Sans Serif"
-         Size            =   72
-         Charset         =   0
-         Weight          =   700
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      ForeColor       =   &H000000FF&
-      Height          =   3135
-      Left            =   1440
-      TabIndex        =   1
-      Top             =   960
-      Visible         =   0   'False
-      Width           =   4695
-   End
-   Begin VB.Image imgTile 
-      Height          =   615
-      Index           =   0
-      Left            =   240
-      Top             =   480
-      Width           =   495
    End
    Begin VB.Menu mnuGame 
       Caption         =   "&Game"
@@ -151,9 +137,9 @@ Private Sub InitWindow()
     
     Dim i As Integer
     
-    For i = 1 To cells * cells - 1
-        Load imgTile(i)
-    Next i
+    'For i = 1 To cells * cells - 1
+    '    Load imgTile(i)
+    'Next i
     
 End Sub
 
@@ -174,7 +160,7 @@ Private Sub InitGame()
     
     Dim cellx As Integer, celly As Integer
     shownCongrats = False
-    lblGameOver.Visible = False
+    'lblGameOver.Visible = False
     
     frmMain.Width = iColWidth * cells + (frmMain.Width - frmMain.ScaleWidth)
     frmMain.Height = iRowHeight * cells + (frmMain.Height - frmMain.ScaleHeight) + sbMainStatusBar.Height
@@ -191,18 +177,16 @@ Private Sub InitGame()
     Dim iCol As Integer
     Dim idx As Integer
     
+    pb.Picture = LoadResPicture(CellResourceId(0), vbResBitmap)
+    
+    
     For iRow = 0 To cells - 1
         For iCol = 0 To cells - 1
             idx = iCol + cells * iRow
-            imgTile(idx).Left = iCol * iColWidth
-            imgTile(idx).Top = iRow * iRowHeight
-            imgTile(idx).Width = iColWidth
-            imgTile(idx).Height = iRowHeight
-            imgTile(idx).Visible = True
-            imgTile(idx).Picture = LoadResPicture(CellResourceId(gameCells(iCol, iRow)), vbResBitmap)
+            BitBlt.BitBlt frmMain.hDC, iCol * 64, iRow * 64, 64, 64, frmMain.pb.hDC, 0, 0, vbSrcCopy
         Next iCol
     Next iRow
-
+    
     Call RandomlyPlace2Or4(gameCells)
     
 End Sub
@@ -220,27 +204,31 @@ Sub DrawTiles(animationSteps As Collection)
     Dim startX As Integer
     Dim startY As Integer
     
-    For animationFrame = 1 To animationFPS
-        For Each animationStep In animationSteps
-            If Not animationStep.amIaMerge Then
-                idx = animationStep.startX + cells * animationStep.startY
-                imgTile(idx).ZOrder (0)
-                imgTile(idx).Left = imgTile(idx).Left + (1# / animationFPS) * iColWidth * (animationStep.endX - animationStep.startX)
-                imgTile(idx).Top = imgTile(idx).Top + (1# / animationFPS) * iRowHeight * (animationStep.endY - animationStep.startY)
-                Sleep 200 / animationFPS
-            End If
-        Next animationStep
-    Next animationFrame
+    'For animationFrame = 1 To animationFPS
+    '    For Each animationStep In animationSteps
+    '        If Not animationStep.amIaMerge Then
+    '            idx = animationStep.startX + cells * animationStep.startY
+    '            imgTile(idx).ZOrder (0)
+    '            imgTile(idx).Left = imgTile(idx).Left + (1# / animationFPS) * iColWidth * (animationStep.endX - animationStep.startX)
+     '           imgTile(idx).Top = imgTile(idx).Top + (1# / animationFPS) * iRowHeight * (animationStep.endY - animationStep.startY)
+     '           Sleep 200 / animationFPS
+    '        End If
+    ''    Next animationStep
+    'Next animationFrame
     
     
     
-        
+    frmMain.Cls
+    
     For iRow = 0 To cells - 1
         For iCol = 0 To cells - 1
             idx = iCol + cells * iRow
-            imgTile(idx).Left = iCol * iColWidth
-            imgTile(idx).Top = iRow * iRowHeight
-            imgTile(idx).Picture = LoadResPicture(CellResourceId(gameCells(iCol, iRow)), vbResBitmap)
+            'imgTile(idx).Left = iCol * iColWidth
+            'imgTile(idx).Top = iRow * iRowHeight
+            frmMain.pb.Picture = LoadResPicture(CellResourceId(gameCells(iCol, iRow)), vbResBitmap)
+            BitBlt.BitBlt frmMain.hDC, iCol * 64, iRow * 64, 64, 64, frmMain.pb.hDC, 0, 0, vbSrcCopy
+
+            'imgTile(idx).Picture = LoadResPicture(CellResourceId(gameCells(iCol, iRow)), vbResBitmap)
         Next iCol
     Next iRow
 End Sub
@@ -252,15 +240,15 @@ Sub UpdateScore()
     Dim reached2048 As Boolean
     reached2048 = False
         
-    Dim x As Integer, y As Integer
-    For x = 0 To cells - 1
-        For y = 0 To cells - 1
-            score = score + gameCells(x, y)
-            If gameCells(x, y) >= 2048 Then
+    Dim X As Integer, Y As Integer
+    For X = 0 To cells - 1
+        For Y = 0 To cells - 1
+            score = score + gameCells(X, Y)
+            If gameCells(X, Y) >= 2048 Then
                 reached2048 = True
             End If
-        Next y
-    Next x
+        Next Y
+    Next X
     
     sbMainStatusBar.SimpleText = "Your score: " + CStr(score)
     
@@ -274,7 +262,7 @@ Sub UpdateScore()
    
     If emptyCells = 0 Then
         If Not NeighbouringTwins(gameCells) Then
-            lblGameOver.Visible = True
+            'lblGameOver.Visible = True
         End If
     End If
     

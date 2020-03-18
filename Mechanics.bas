@@ -140,7 +140,11 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
     Set ApplyGravity = animationSteps
 End Function
 
-Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, stepX As Integer, stepY As Integer, startX As Integer, startY As Integer, endX As Integer, endY As Integer) As Collection
+Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, _
+                     stepX As Integer, stepY As Integer, _
+                     startX As Integer, startY As Integer, _
+                     endX As Integer, endY As Integer) As Collection
+                     
     Dim x As Integer
     Dim y As Integer
     Dim a As animationStep
@@ -208,7 +212,7 @@ Function NeighbouringTwins(gameCells() As Integer) As Boolean
     NeighbouringTwins = areThereNeighbours
 End Function
 
-Sub GameStep(gameCells() As Integer, direction As Directions)
+Function GameStep(gameCells() As Integer, direction As Directions) As Collection
     Dim dx As Integer, dy As Integer
     Dim stepX As Integer, stepY As Integer
     Dim startX As Integer, startY As Integer
@@ -253,7 +257,7 @@ Sub GameStep(gameCells() As Integer, direction As Directions)
             endY = 0
         Case Else
             Call addLog("exiting because of unimplemented direction")
-            Exit Sub
+            Exit Function
     End Select
 
     If EmptyCellCount(gameCells) = 0 Then
@@ -262,7 +266,7 @@ Sub GameStep(gameCells() As Integer, direction As Directions)
             Call addLog("GameStep(): there are, however, valid moves left.")
         Else
             Call addLog("GameStep(): there are no valid moves left. Game over!")
-            Exit Sub
+            Exit Function
         End If
     End If
     
@@ -280,6 +284,5 @@ Sub GameStep(gameCells() As Integer, direction As Directions)
         Call RandomlyPlace2Or4(gameCells)
     End If
     
-    Call frmMain.DrawTiles(appendCollection(animationSteps, mergeAnimationSteps))
-    Call frmMain.UpdateScore
-End Sub
+    Set GameStep = appendCollection(animationSteps, mergeAnimationSteps)
+End Function

@@ -98,9 +98,7 @@ Private Sub Form_Activate()
     Set animationSteps = New Collection
     
     Call addLog("frmMain Form_Activate()")
-    
-    Call DrawBoard
-    
+       
     frmMain.SetFocus
 End Sub
 
@@ -109,18 +107,25 @@ Private Sub Form_GotFocus()
 End Sub
 
 Private Sub Form_KeyUp(KeyCode As Integer, Shift As Integer)
+    Call handleKey(KeyCode)
+End Sub
 
+Sub handleKey(KeyCode As Integer)
+    Dim dummy As Collection
+    
     Select Case KeyCode
     Case vbKeyH, vbKeyLeft
-        Call GameStep(gameCells, Directions.Left)
+        Set dummy = GameStep(gameCells, Directions.Left)
     Case vbKeyJ, vbKeyDown
-        Call GameStep(gameCells, Directions.Down)
+        Set dummy = GameStep(gameCells, Directions.Down)
     Case vbKeyK, vbKeyUp
-        Call GameStep(gameCells, Directions.Up)
+        Set dummy = GameStep(gameCells, Directions.Up)
     Case vbKeyL, vbKeyRight
-        Call GameStep(gameCells, Directions.Right)
+        Set dummy = GameStep(gameCells, Directions.Right)
     End Select
     
+    Call DrawBoard(gameCells)
+    Call UpdateScore
 End Sub
 
 Private Sub Form_Load()
@@ -139,15 +144,6 @@ Private Sub InitWindow()
     iRowHeight = frmMain.ScaleY(LoadResPicture(101, vbResBitmap).Height, vbHimetric, vbPixels)
     iColWidth = frmMain.ScaleX(LoadResPicture(101, vbResBitmap).Width, vbHimetric, vbPixels)
 End Sub
-
-Private Function CellResourceId(value As Integer) As Integer
-    Select Case value
-        Case 0
-            CellResourceId = 199
-        Case Else
-            CellResourceId = Int(Math.log(value) / Math.log(2)) + 100
-    End Select
-End Function
 
 Private Sub InitGame()
     ReDim gameCells(cells - 1, cells - 1) As Integer
@@ -178,8 +174,8 @@ Private Sub InitGame()
     pbCanvas.Visible = True
     
     Call RandomlyPlace2Or4(gameCells)
+    Call DrawBoard(gameCells)
 End Sub
-
 
 Sub UpdateScore()
     Dim score As Integer
@@ -188,15 +184,15 @@ Sub UpdateScore()
     Dim reached2048 As Boolean
     reached2048 = False
         
-    Dim X As Integer, Y As Integer
-    For X = 0 To cells - 1
-        For Y = 0 To cells - 1
-            score = score + gameCells(X, Y)
-            If gameCells(X, Y) >= 2048 Then
+    Dim x As Integer, y As Integer
+    For x = 0 To cells - 1
+        For y = 0 To cells - 1
+            score = score + gameCells(x, y)
+            If gameCells(x, y) >= 2048 Then
                 reached2048 = True
             End If
-        Next Y
-    Next X
+        Next y
+    Next x
     
     sbMainStatusBar.SimpleText = "Your score: " + CStr(score)
     
@@ -214,6 +210,10 @@ Sub UpdateScore()
         End If
     End If
     
+End Sub
+
+Private Sub Form_Terminate()
+    unloadAll
 End Sub
 
 Private Sub Form_Unload(Cancel As Integer)
@@ -245,7 +245,14 @@ Private Sub mnuGameNew_Click()
     Call DrawTiles(New Collection)
 End Sub
 
+Private Sub pbCanvas_KeyUp(KeyCode As Integer, Shift As Integer)
+    ' if the picture box happens to have focus and gets keyevents,
+    ' send them through to our other handler.
+    Call handleKey(KeyCode)
+End Sub
+
 Private Sub tAutoplay_Timer()
+    End
     Call GameStep(gameCells, Directions.Left)
     Call GameStep(gameCells, Directions.Up)
 End Sub

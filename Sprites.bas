@@ -91,16 +91,29 @@ Public Sub Animate(gameCells() As Integer, moves As Collection)
     tickCount = GetTickCount
     Dim prevTickCount As Long
     prevTickCount = 0
-    i = 0
     Dim move As animationStep
     Dim x As Integer, xDistance As Integer
     Dim y As Integer, yDistance As Integer
     
-    Do While i <= 24
+    Dim shifts As Collection
+    Dim merges As Collection
+    Set shifts = New Collection
+    Set merges = New Collection
+        
+    For Each move In moves
+        If move.amIaMerge Then
+            merges.Add move
+        Else
+            shifts.Add move
+        End If
+    Next move
+    
+    i = 0
+    Do While i <= 24 And shifts.Count > 0
         DoEvents
         tickCount = GetTickCount
         If tickCount - prevTickCount >= 1000 / 24 Then
-            For Each move In moves
+            For Each move In shifts
                 xDistance = 64 * (move.endX - move.startX) * (i / 24)
                 yDistance = 64 * (move.endY - move.startY) * (i / 24)
                 BitBlt frmMain.pbCanvas.hdc, _
@@ -113,6 +126,26 @@ Public Sub Animate(gameCells() As Integer, moves As Collection)
             i = i + 1
         End If
     Loop
+    
+    i = 0
+    Do While i <= 24 And merges.Count > 0
+        DoEvents
+        tickCount = GetTickCount
+        If tickCount - prevTickCount >= 1000 / 24 Then
+            For Each move In merges
+                BitBlt frmMain.pbCanvas.hdc, _
+                            move.endX * 64, _
+                            move.endY * 64, _
+                            64 * (i / 24), 64 * (i / 24), _
+                            sprites(CellSpriteId(move.cellValue)), 0, 0, vbSrcCopy
+            Next move
+            frmMain.pbCanvas.Refresh
+            prevTickCount = tickCount
+            i = i + 1
+        End If
+    Loop
+    
+    
     
 End Sub
 

@@ -112,6 +112,7 @@ End Sub
 
 Sub handleKey(KeyCode As Integer)
     Dim dummy As Collection
+    Set dummy = New Collection
     
     Select Case KeyCode
     Case vbKeyH, vbKeyLeft

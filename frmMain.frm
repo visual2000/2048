@@ -109,13 +109,13 @@ End Sub
 Private Sub Form_KeyUp(KeyCode As Integer, Shift As Integer)
 
     Select Case KeyCode
-    Case 72, 37
+    Case vbKeyH, vbKeyLeft
         Call GameStep(gameCells, Directions.Left)
-    Case 74, 40
+    Case vbKeyJ, vbKeyDown
         Call GameStep(gameCells, Directions.Down)
-    Case 75, 38
+    Case vbKeyK, vbKeyUp
         Call GameStep(gameCells, Directions.Up)
-    Case 76, 39
+    Case vbKeyL, vbKeyRight
         Call GameStep(gameCells, Directions.Right)
     End Select
     

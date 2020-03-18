@@ -8,17 +8,20 @@ Begin VB.Form frmMain
    ClientTop       =   735
    ClientWidth     =   7875
    LinkTopic       =   "Form1"
-   ScaleHeight     =   373
-   ScaleMode       =   3  'Pixel
-   ScaleWidth      =   525
+   ScaleHeight     =   5595
+   ScaleWidth      =   7875
    StartUpPosition =   3  'Windows Default
-   Begin VB.PictureBox pb 
+   Begin VB.PictureBox pbCanvas 
+      Appearance      =   0  'Flat
       AutoRedraw      =   -1  'True
+      BackColor       =   &H00008000&
+      BorderStyle     =   0  'None
+      ForeColor       =   &H80000008&
       Height          =   1455
       Left            =   1200
-      ScaleHeight     =   93
+      ScaleHeight     =   97
       ScaleMode       =   3  'Pixel
-      ScaleWidth      =   93
+      ScaleWidth      =   97
       TabIndex        =   1
       Top             =   480
       Visible         =   0   'False
@@ -80,7 +83,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Const cells = 4
+Public cells As Integer
 Dim gameCells() As Integer
     
 Dim iRowHeight As Integer
@@ -96,10 +99,9 @@ Private Sub Form_Activate()
     
     Call addLog("frmMain Form_Activate()")
     
-    Call DrawTiles(animationSteps)
+    Call DrawBoard
     
     frmMain.SetFocus
-    
 End Sub
 
 Private Sub Form_GotFocus()
@@ -123,24 +125,19 @@ End Sub
 
 Private Sub Form_Load()
     Randomize
+    
+    cells = 4
+    initialiseGraphics
+    
     Call InitWindow
     Call InitGame
-    
 End Sub
 Private Sub InitWindow()
     ''' It appears that VB6 size units are tenth of pixels?
-    
     ' they're himetrics, probably.  Views have ScaleX and ScaleY methods
     
-    iRowHeight = frmMain.ScaleY(LoadResPicture(101, vbResBitmap).Height, vbHimetric, vbTwips)
-    iColWidth = frmMain.ScaleX(LoadResPicture(101, vbResBitmap).Width, vbHimetric, vbTwips)
-    
-    Dim i As Integer
-    
-    'For i = 1 To cells * cells - 1
-    '    Load imgTile(i)
-    'Next i
-    
+    iRowHeight = frmMain.ScaleY(LoadResPicture(101, vbResBitmap).Height, vbHimetric, vbPixels)
+    iColWidth = frmMain.ScaleX(LoadResPicture(101, vbResBitmap).Width, vbHimetric, vbPixels)
 End Sub
 
 Private Function CellResourceId(value As Integer) As Integer
@@ -155,15 +152,12 @@ End Function
 Private Sub InitGame()
     ReDim gameCells(cells - 1, cells - 1) As Integer
     
-    ' One needs to 'Load' a control array before using it. Sigh.
-    ' but only once... so ignore the 0th item...
-    
     Dim cellx As Integer, celly As Integer
     shownCongrats = False
     'lblGameOver.Visible = False
     
-    frmMain.Width = iColWidth * cells + (frmMain.Width - frmMain.ScaleWidth)
-    frmMain.Height = iRowHeight * cells + (frmMain.Height - frmMain.ScaleHeight) + sbMainStatusBar.Height
+    frmMain.Width = Screen.TwipsPerPixelX * iColWidth * cells + (frmMain.Width - frmMain.ScaleWidth)
+    frmMain.Height = Screen.TwipsPerPixelY * iRowHeight * cells + (frmMain.Height - frmMain.ScaleHeight) + sbMainStatusBar.Height
     
     For celly = 0 To cells - 1
         For cellx = 0 To cells - 1
@@ -177,61 +171,15 @@ Private Sub InitGame()
     Dim iCol As Integer
     Dim idx As Integer
     
-    pb.Picture = LoadResPicture(CellResourceId(0), vbResBitmap)
-    
-    
-    For iRow = 0 To cells - 1
-        For iCol = 0 To cells - 1
-            idx = iCol + cells * iRow
-            BitBlt.BitBlt frmMain.hDC, iCol * 64, iRow * 64, 64, 64, frmMain.pb.hDC, 0, 0, vbSrcCopy
-        Next iCol
-    Next iRow
+    pbCanvas.Width = frmMain.ScaleX(iColWidth * cells, vbPixels, vbTwips)
+    pbCanvas.Height = frmMain.ScaleY(iRowHeight * cells, vbPixels, vbTwips)
+    pbCanvas.Left = 0
+    pbCanvas.Top = 0
+    pbCanvas.Visible = True
     
     Call RandomlyPlace2Or4(gameCells)
-    
 End Sub
 
-Sub DrawTiles(animationSteps As Collection)
-    ''' Populate the grid with tiles having potentially some info.
-    Dim iRow As Integer
-    Dim iCol As Integer
-    Dim idx As Integer
-    
-    Dim animationStep As animationStep
-    Dim animationFrame As Integer
-    Dim animationFPS As Integer
-    animationFPS = 5
-    Dim startX As Integer
-    Dim startY As Integer
-    
-    'For animationFrame = 1 To animationFPS
-    '    For Each animationStep In animationSteps
-    '        If Not animationStep.amIaMerge Then
-    '            idx = animationStep.startX + cells * animationStep.startY
-    '            imgTile(idx).ZOrder (0)
-    '            imgTile(idx).Left = imgTile(idx).Left + (1# / animationFPS) * iColWidth * (animationStep.endX - animationStep.startX)
-     '           imgTile(idx).Top = imgTile(idx).Top + (1# / animationFPS) * iRowHeight * (animationStep.endY - animationStep.startY)
-     '           Sleep 200 / animationFPS
-    '        End If
-    ''    Next animationStep
-    'Next animationFrame
-    
-    
-    
-    frmMain.Cls
-    
-    For iRow = 0 To cells - 1
-        For iCol = 0 To cells - 1
-            idx = iCol + cells * iRow
-            'imgTile(idx).Left = iCol * iColWidth
-            'imgTile(idx).Top = iRow * iRowHeight
-            frmMain.pb.Picture = LoadResPicture(CellResourceId(gameCells(iCol, iRow)), vbResBitmap)
-            BitBlt.BitBlt frmMain.hDC, iCol * 64, iRow * 64, 64, 64, frmMain.pb.hDC, 0, 0, vbSrcCopy
-
-            'imgTile(idx).Picture = LoadResPicture(CellResourceId(gameCells(iCol, iRow)), vbResBitmap)
-        Next iCol
-    Next iRow
-End Sub
 
 Sub UpdateScore()
     Dim score As Integer
@@ -296,7 +244,6 @@ Private Sub mnuGameNew_Click()
     Call InitGame
     Call DrawTiles(New Collection)
 End Sub
-
 
 Private Sub tAutoplay_Timer()
     Call GameStep(gameCells, Directions.Left)

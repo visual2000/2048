@@ -124,6 +124,7 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
                             a.startY = gravityStartY
                             a.endX = gravityEndX
                             a.endY = gravityEndY
+                            a.cellValue = gameCells(gravityEndX, gravityEndY)
                             animationSteps.Add a
                             Call addLog("=================")
                             Call addLog(CStr(a.startX) + "," + CStr(a.startY) + "=>" + CStr(a.endX) + "," + CStr(a.endY))
@@ -167,6 +168,7 @@ Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, _
                         a.endX = x
                         a.endY = y
                         a.amIaMerge = True
+                        a.cellValue = gameCells(x, y)
                         animationSteps.Add a
                     End If
                 End If

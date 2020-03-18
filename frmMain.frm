@@ -124,7 +124,9 @@ Sub handleKey(KeyCode As Integer)
         Set dummy = GameStep(gameCells, Directions.Right)
     End Select
     
+    Call Animate(gameCells, dummy)
     Call DrawBoard(gameCells)
+    
     Call UpdateScore
 End Sub
 
@@ -252,8 +254,10 @@ Private Sub pbCanvas_KeyUp(KeyCode As Integer, Shift As Integer)
 End Sub
 
 Private Sub tAutoplay_Timer()
-    End
-    Call GameStep(gameCells, Directions.Left)
-    Call GameStep(gameCells, Directions.Up)
+    Dim dummy As Collection
+    Set dummy = GameStep(gameCells, Directions.Left)
+    Call DrawBoard(gameCells)
+    Set dummy = GameStep(gameCells, Directions.Up)
+    Call DrawBoard(gameCells)
 End Sub
 

@@ -19,6 +19,7 @@ Private mvarstartY As Integer 'local copy
 Private mvarendX As Integer 'local copy
 Private mvarendY As Integer 'local copy
 
+Public cellValue As Integer
 Public amIaMerge As Boolean
 
 

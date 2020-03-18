@@ -2,10 +2,13 @@ Attribute VB_Name = "Sprites"
 Option Explicit
 
 Public Declare Function BitBlt Lib "gdi32" _
- (ByVal hDestDC As Long, ByVal X As Long, _
- ByVal Y As Long, ByVal nWidth As Long, _
+ (ByVal hDestDC As Long, ByVal x As Long, _
+ ByVal y As Long, ByVal nWidth As Long, _
  ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc _
  As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
+ 
+'code timer
+Private Declare Function GetTickCount Lib "kernel32" () As Long
  
 'creating buffers / loading sprites
 Private Declare Function CreateCompatibleBitmap Lib "gdi32" (ByVal hdc As Long, ByVal nWidth As Long, ByVal nHeight As Long) As Long
@@ -80,6 +83,38 @@ Private Function CellSpriteId(value As Integer) As Integer
         CellSpriteId = -1
     End If
 End Function
+
+Public Sub Animate(gameCells() As Integer, moves As Collection)
+
+    Dim i As Long
+    Dim tickCount As Long
+    tickCount = GetTickCount
+    Dim prevTickCount As Long
+    prevTickCount = 0
+    i = 0
+    Dim move As animationStep
+    Dim x As Integer, xDistance As Integer
+    Dim y As Integer, yDistance As Integer
+    
+    Do While i <= 24
+        DoEvents
+        tickCount = GetTickCount
+        If tickCount - prevTickCount >= 1000 / 24 Then
+            For Each move In moves
+                xDistance = 64 * (move.endX - move.startX) * (i / 24)
+                yDistance = 64 * (move.endY - move.startY) * (i / 24)
+                BitBlt frmMain.pbCanvas.hdc, _
+                            move.startX * 64 + xDistance, _
+                            move.startY * 64 + yDistance, _
+                            64, 64, sprites(CellSpriteId(move.cellValue)), 0, 0, vbSrcCopy
+            Next move
+            frmMain.pbCanvas.Refresh
+            prevTickCount = tickCount
+            i = i + 1
+        End If
+    Loop
+    
+End Sub
 
 Public Sub DrawBoard(gameCells() As Integer)
 

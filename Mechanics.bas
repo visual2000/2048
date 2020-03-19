@@ -62,7 +62,7 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
     Dim x As Integer, y As Integer
     Dim needToContinueLoop As Boolean
     
-    Dim a As animationStep
+    Dim a As AnimationStep
     Dim animationSteps As Collection
     Set animationSteps = New Collection
     
@@ -119,7 +119,7 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
                             gameCells(gravityStartX, gravityStartY) = 0
                             needToContinueLoop = True
                             ' Add to the list of proposed moves that goes back to the form
-                            Set a = New animationStep
+                            Set a = New AnimationStep
                             a.startX = gravityStartX
                             a.startY = gravityStartY
                             a.endX = gravityEndX
@@ -148,7 +148,7 @@ Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, _
                      
     Dim x As Integer
     Dim y As Integer
-    Dim a As animationStep
+    Dim a As AnimationStep
     Dim animationSteps As Collection
     Set animationSteps = New Collection
     For y = startY To endY Step stepY ' each row
@@ -162,7 +162,7 @@ Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, _
                         gameCells(x + dx, y + dy) = 0
                         ' apply gravity on the remainder of this row
                         Set animationSteps = appendCollection(animationSteps, ApplyGravity(gameCells, dx, dy, stepX, stepY, x + dx, y + dy, endX, y + dy))
-                        Set a = New animationStep
+                        Set a = New AnimationStep
                         a.startX = x + dx
                         a.startY = y + dy
                         a.endX = x
@@ -282,7 +282,12 @@ Function GameStep(gameCells() As Integer, direction As Directions) As Collection
     Set mergeAnimationSteps = ApplyMerges(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
     didMergeMove = mergeAnimationSteps.Count > 0
     
+    ' we want to do more moves below, potentially, so let's save these:
+    Set mergeAnimationSteps = appendCollection(mergeAnimationSteps, animationSteps)
+    Set animationSteps = New Collection
+    
     If didMergeMove Or didGravityMove Or frmMain.mnuCheatAlwaysGive.Checked Then
+        Set animationSteps = ApplyGravity(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
         Call RandomlyPlace2Or4(gameCells)
     End If
     

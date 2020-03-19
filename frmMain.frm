@@ -86,8 +86,7 @@ Option Explicit
 Public cells As Integer
 Dim gameCells() As Integer
     
-Dim iRowHeight As Integer
-Dim iColWidth As Integer
+Dim cellPx As Integer
 
 Dim shownCongrats As Boolean
 
@@ -144,8 +143,7 @@ Private Sub InitWindow()
     ''' It appears that VB6 size units are tenth of pixels?
     ' they're himetrics, probably.  Views have ScaleX and ScaleY methods
     
-    iRowHeight = frmMain.ScaleY(LoadResPicture(101, vbResBitmap).Height, vbHimetric, vbPixels)
-    iColWidth = frmMain.ScaleX(LoadResPicture(101, vbResBitmap).Width, vbHimetric, vbPixels)
+    cellPx = frmMain.ScaleY(LoadResPicture(101, vbResBitmap).Height, vbHimetric, vbPixels)
 End Sub
 
 Private Sub InitGame()
@@ -155,8 +153,8 @@ Private Sub InitGame()
     shownCongrats = False
     'lblGameOver.Visible = False
     
-    frmMain.Width = Screen.TwipsPerPixelX * iColWidth * cells + (frmMain.Width - frmMain.ScaleWidth)
-    frmMain.Height = Screen.TwipsPerPixelY * iRowHeight * cells + (frmMain.Height - frmMain.ScaleHeight) + sbMainStatusBar.Height
+    frmMain.Width = Screen.TwipsPerPixelX * cellPx * cells + (frmMain.Width - frmMain.ScaleWidth)
+    frmMain.Height = Screen.TwipsPerPixelY * cellPx * cells + (frmMain.Height - frmMain.ScaleHeight) + sbMainStatusBar.Height
     
     For celly = 0 To cells - 1
         For cellx = 0 To cells - 1
@@ -170,8 +168,8 @@ Private Sub InitGame()
     Dim iCol As Integer
     Dim idx As Integer
     
-    pbCanvas.Width = frmMain.ScaleX(iColWidth * cells, vbPixels, vbTwips)
-    pbCanvas.Height = frmMain.ScaleY(iRowHeight * cells, vbPixels, vbTwips)
+    pbCanvas.Width = frmMain.ScaleX(cellPx * cells, vbPixels, vbTwips)
+    pbCanvas.Height = frmMain.ScaleY(cellPx * cells, vbPixels, vbTwips)
     pbCanvas.Left = 0
     pbCanvas.Top = 0
     pbCanvas.Visible = True

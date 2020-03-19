@@ -29,8 +29,12 @@ Public myBackBuffer As Long
 
 Public myBufferBMP As Long
 
+Dim cellPx As Integer
+    
+
 ' Initialisation - backbuffer bmp
 Public Sub initialiseGraphics()
+    cellPx = frmMain.ScaleY(LoadResPicture(101, vbResBitmap).Height, vbHimetric, vbPixels)
     'create a compatable DC for the back buffer..
     myBackBuffer = CreateCompatibleDC(GetDC(0))
 
@@ -38,7 +42,7 @@ Public Sub initialiseGraphics()
     'that is the size of our form.
     'NOTE - the bitmap will act as the actual graphics surface inside the DC
     'because without a bitmap in the DC, the DC cannot hold graphical data..
-    myBufferBMP = CreateCompatibleBitmap(GetDC(0), 64 * frmMain.cells, 64 * frmMain.cells)
+    myBufferBMP = CreateCompatibleBitmap(GetDC(0), cellPx * frmMain.cells, cellPx * frmMain.cells)
     
     'final step of making the back buffer...
     'load our created blank bitmap surface into our buffer
@@ -46,7 +50,7 @@ Public Sub initialiseGraphics()
     SelectObject myBackBuffer, myBufferBMP
     
     'before we can blit to the buffer, we should fill it with black
-    BitBlt myBackBuffer, 0, 0, 64 * frmMain.cells, 64 * frmMain.cells, 0, 0, 0, vbWhiteness
+    BitBlt myBackBuffer, 0, 0, cellPx * frmMain.cells, cellPx * frmMain.cells, 0, 0, 0, vbWhiteness
     
     loadAllSprites
 End Sub
@@ -85,13 +89,12 @@ Private Function CellSpriteId(value As Integer) As Integer
 End Function
 
 Public Sub Animate(gameCells() As Integer, moves As Collection)
-
     Dim i As Long
     Dim tickCount As Long
     tickCount = GetTickCount
     Dim prevTickCount As Long
     prevTickCount = 0
-    Dim move As animationStep
+    Dim move As AnimationStep
     Dim x As Integer, xDistance As Integer
     Dim y As Integer, yDistance As Integer
     
@@ -108,18 +111,22 @@ Public Sub Animate(gameCells() As Integer, moves As Collection)
         End If
     Next move
     
+    Dim animDuration As Integer, frames As Integer
+    animDuration = 100 ' milliseconds
+    frames = 12 ' number of frames per animation
+    
     i = 0
-    Do While i <= 24 And shifts.Count > 0
+    Do While i <= frames And shifts.Count > 0
         DoEvents
         tickCount = GetTickCount
-        If tickCount - prevTickCount >= 1000 / 24 Then
+        If tickCount - prevTickCount >= animDuration / frames Then
             For Each move In shifts
-                xDistance = 64 * (move.endX - move.startX) * (i / 24)
-                yDistance = 64 * (move.endY - move.startY) * (i / 24)
+                xDistance = cellPx * (move.endX - move.startX) * (i / frames)
+                yDistance = cellPx * (move.endY - move.startY) * (i / frames)
                 BitBlt frmMain.pbCanvas.hdc, _
-                            move.startX * 64 + xDistance, _
-                            move.startY * 64 + yDistance, _
-                            64, 64, sprites(CellSpriteId(move.cellValue)), 0, 0, vbSrcCopy
+                            move.startX * cellPx + xDistance, _
+                            move.startY * cellPx + yDistance, _
+                            cellPx, cellPx, sprites(CellSpriteId(move.cellValue)), 0, 0, vbSrcCopy
             Next move
             frmMain.pbCanvas.Refresh
             prevTickCount = tickCount
@@ -128,15 +135,21 @@ Public Sub Animate(gameCells() As Integer, moves As Collection)
     Loop
     
     i = 0
-    Do While i <= 24 And merges.Count > 0
+    Do While i <= frames And merges.Count > 0
         DoEvents
         tickCount = GetTickCount
-        If tickCount - prevTickCount >= 1000 / 24 Then
+        If tickCount - prevTickCount >= animDuration / frames Then
             For Each move In merges
+                xDistance = cellPx * (move.endX - move.startX) * (i / frames)
+                yDistance = cellPx * (move.endY - move.startY) * (i / frames)
                 BitBlt frmMain.pbCanvas.hdc, _
-                            move.endX * 64, _
-                            move.endY * 64, _
-                            64 * (i / 24), 64 * (i / 24), _
+                            move.startX * cellPx + xDistance, _
+                            move.startY * cellPx + yDistance, _
+                            cellPx, cellPx, sprites(CellSpriteId(move.cellValue / 2)), 0, 0, vbSrcCopy
+                BitBlt frmMain.pbCanvas.hdc, _
+                            move.endX * cellPx, _
+                            move.endY * cellPx, _
+                            cellPx * (i / frames), cellPx * (i / frames), _
                             sprites(CellSpriteId(move.cellValue)), 0, 0, vbSrcCopy
             Next move
             frmMain.pbCanvas.Refresh
@@ -152,25 +165,20 @@ End Sub
 Public Sub DrawBoard(gameCells() As Integer)
 
     Dim iRow As Integer, iCol As Integer
-    Dim idx As Integer
     
-    BitBlt myBackBuffer, 0, 0, 64 * frmMain.cells, 64 * frmMain.cells, 0, 0, 0, vbWhiteness
+    BitBlt myBackBuffer, 0, 0, cellPx * frmMain.cells, cellPx * frmMain.cells, 0, 0, 0, vbWhiteness
     
     For iRow = 0 To frmMain.cells - 1
         For iCol = 0 To frmMain.cells - 1
-            idx = iCol + frmMain.cells * iRow
             
-            Debug.Print ("cell value: " & CStr(gameCells(iCol, iRow)))
-            Debug.Print ("sprite id: " & CStr(CellSpriteId(gameCells(iCol, iRow))))
-            
-            BitBlt myBackBuffer, iCol * 64, iRow * 64, 64, 64, _
-            sprites(CellSpriteId(gameCells(iCol, iRow))), 0, 0, vbSrcCopy
+            BitBlt myBackBuffer, iCol * cellPx, iRow * cellPx, cellPx, cellPx, _
+                   sprites(CellSpriteId(gameCells(iCol, iRow))), 0, 0, vbSrcCopy
         Next iCol
     Next iRow
 
     frmMain.pbCanvas.Cls
-    BitBlt frmMain.pbCanvas.hdc, 0, 0, 64 * frmMain.cells, _
-           64 * frmMain.cells, myBackBuffer, 0, 0, vbSrcCopy
+    BitBlt frmMain.pbCanvas.hdc, 0, 0, cellPx * frmMain.cells, _
+           cellPx * frmMain.cells, myBackBuffer, 0, 0, vbSrcCopy
 End Sub
     
 Public Sub loadAllSprites()
@@ -191,7 +199,6 @@ Public Sub loadAllSprites()
     sprites(11) = LoadGraphicDC(111)
     sprites(12) = LoadGraphicDC(112)
     sprites(13) = LoadGraphicDC(113)
-    Debug.Print "loaded sprites"
     
 End Sub
 

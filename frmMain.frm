@@ -11,22 +11,6 @@ Begin VB.Form frmMain
    ScaleHeight     =   5595
    ScaleWidth      =   7875
    StartUpPosition =   3  'Windows Default
-   Begin VB.PictureBox pbCanvas 
-      Appearance      =   0  'Flat
-      AutoRedraw      =   -1  'True
-      BackColor       =   &H00008000&
-      BorderStyle     =   0  'None
-      ForeColor       =   &H80000008&
-      Height          =   1455
-      Left            =   1200
-      ScaleHeight     =   97
-      ScaleMode       =   3  'Pixel
-      ScaleWidth      =   97
-      TabIndex        =   1
-      Top             =   480
-      Visible         =   0   'False
-      Width           =   1455
-   End
    Begin VB.Timer tAutoplay 
       Enabled         =   0   'False
       Interval        =   100
@@ -49,6 +33,22 @@ Begin VB.Form frmMain
          BeginProperty Panel1 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
          EndProperty
       EndProperty
+   End
+   Begin VB.PictureBox pbCanvas 
+      Appearance      =   0  'Flat
+      AutoRedraw      =   -1  'True
+      BackColor       =   &H00008000&
+      BorderStyle     =   0  'None
+      ForeColor       =   &H80000008&
+      Height          =   1455
+      Left            =   1200
+      ScaleHeight     =   97
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   97
+      TabIndex        =   1
+      Top             =   480
+      Visible         =   0   'False
+      Width           =   1455
    End
    Begin VB.Menu mnuGame 
       Caption         =   "&Game"
@@ -126,7 +126,6 @@ Sub handleKey(KeyCode As Integer)
     
     Call Animate(gameCells, dummy)
     Call DrawBoard(gameCells)
-    
     Call UpdateScore
 End Sub
 
@@ -138,6 +137,7 @@ Private Sub Form_Load()
     
     Call InitWindow
     Call InitGame
+    Call drawGameOver
 End Sub
 Private Sub InitWindow()
     ''' It appears that VB6 size units are tenth of pixels?
@@ -151,7 +151,6 @@ Private Sub InitGame()
     
     Dim cellx As Integer, celly As Integer
     shownCongrats = False
-    'lblGameOver.Visible = False
     
     frmMain.Width = Screen.TwipsPerPixelX * cellPx * cells + (frmMain.Width - frmMain.ScaleWidth)
     frmMain.Height = Screen.TwipsPerPixelY * cellPx * cells + (frmMain.Height - frmMain.ScaleHeight) + sbMainStatusBar.Height
@@ -176,6 +175,8 @@ Private Sub InitGame()
     
     Call RandomlyPlace2Or4(gameCells)
     Call DrawBoard(gameCells)
+    Call UpdateScore
+
 End Sub
 
 Sub UpdateScore()
@@ -206,8 +207,10 @@ Sub UpdateScore()
     emptyCells = EmptyCellCount(gameCells)
    
     If emptyCells = 0 Then
+        Call addLog("there are 0 empty cells!")
         If Not NeighbouringTwins(gameCells) Then
-            'lblGameOver.Visible = True
+            Call addLog("------------- game over")
+            Call sprites.drawGameOver
         End If
     End If
     
@@ -243,7 +246,7 @@ End Sub
 
 Private Sub mnuGameNew_Click()
     Call InitGame
-    Call DrawTiles(New Collection)
+    Call DrawBoard(gameCells)
 End Sub
 
 Private Sub pbCanvas_KeyUp(KeyCode As Integer, Shift As Integer)
@@ -256,7 +259,11 @@ Private Sub tAutoplay_Timer()
     Dim dummy As Collection
     Set dummy = GameStep(gameCells, Directions.Left)
     Call DrawBoard(gameCells)
+    Call UpdateScore
+
     Set dummy = GameStep(gameCells, Directions.Up)
     Call DrawBoard(gameCells)
+    Call UpdateScore
+
 End Sub
 

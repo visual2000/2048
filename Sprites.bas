@@ -88,7 +88,7 @@ Private Function CellSpriteId(value As Integer) As Integer
     End If
 End Function
 
-Public Sub Animate(gameCells() As Integer, moves As Collection)
+Public Sub Animate(gameCells() As Integer, ByVal moves As Collection)
     Dim i As Long
     Dim tickCount As Long
     tickCount = GetTickCount
@@ -180,10 +180,16 @@ Public Sub DrawBoard(gameCells() As Integer)
     BitBlt frmMain.pbCanvas.hdc, 0, 0, cellPx * frmMain.cells, _
            cellPx * frmMain.cells, myBackBuffer, 0, 0, vbSrcCopy
 End Sub
-    
+
+Public Sub drawGameOver()
+    BitBlt myBackBuffer, 0, 0, 256, 256, sprites(15), 0, 0, vbSrcAnd
+    BitBlt myBackBuffer, 0, 0, 256, 256, sprites(14), 0, 0, vbSrcInvert
+    BitBlt frmMain.pbCanvas.hdc, 0, 0, 256, 256, myBackBuffer, 0, 0, vbSrcCopy
+End Sub
+
 Public Sub loadAllSprites()
 
-    ReDim sprites(0 To 14) As Long
+    ReDim sprites(0 To 15) As Long
     
     sprites(0) = LoadGraphicDC(199) ' this is our BG tile
     sprites(1) = LoadGraphicDC(101)
@@ -199,6 +205,8 @@ Public Sub loadAllSprites()
     sprites(11) = LoadGraphicDC(111)
     sprites(12) = LoadGraphicDC(112)
     sprites(13) = LoadGraphicDC(113)
+    sprites(14) = LoadGraphicDC(200) ' This is our Game Over screen
+    sprites(14) = LoadGraphicDC(201) ' This is our Game Over mask
     
 End Sub
 

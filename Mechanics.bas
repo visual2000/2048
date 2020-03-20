@@ -126,12 +126,8 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
                             a.endY = gravityEndY
                             a.cellValue = gameCells(gravityEndX, gravityEndY)
                             animationSteps.Add a
-                            Call addLog("=================")
-                            Call addLog(CStr(a.startX) + "," + CStr(a.startY) + "=>" + CStr(a.endX) + "," + CStr(a.endY))
                         End If
-                    
                     End If
-                    
                 End If
                 ' if we're not empty we're done, skip ahead
             Next x
@@ -268,6 +264,7 @@ Function GameStep(gameCells() As Integer, direction As Directions) As Collection
             Call addLog("GameStep(): there are, however, valid moves left.")
         Else
             Call addLog("GameStep(): there are no valid moves left. Game over!")
+            Set GameStep = New Collection
             Exit Function
         End If
     End If

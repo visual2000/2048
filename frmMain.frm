@@ -53,13 +53,12 @@ Begin VB.Form frmMain
    End
    Begin VB.Menu mnuGame 
       Caption         =   "&Game"
-      Begin VB.Menu mnuGameDebug 
-         Caption         =   "Show debug log"
-         Shortcut        =   ^D
-      End
       Begin VB.Menu mnuGameNew 
          Caption         =   "&New Game"
          Shortcut        =   {F2}
+      End
+      Begin VB.Menu d1 
+         Caption         =   "-"
       End
       Begin VB.Menu mnuGameExit 
          Caption         =   "E&xit"
@@ -74,6 +73,13 @@ Begin VB.Form frmMain
       Begin VB.Menu mnuCheatsAutoplay 
          Caption         =   "Autoplay left/up"
          Shortcut        =   ^P
+      End
+      Begin VB.Menu d2 
+         Caption         =   "-"
+      End
+      Begin VB.Menu mnuGameDebug 
+         Caption         =   "Show debug log"
+         Shortcut        =   ^D
       End
    End
 End

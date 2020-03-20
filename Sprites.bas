@@ -183,7 +183,7 @@ End Sub
 
 Public Sub drawGameOver()
     BitBlt myBackBuffer, 0, 0, 256, 256, sprites(15), 0, 0, vbSrcAnd
-    BitBlt myBackBuffer, 0, 0, 256, 256, sprites(14), 0, 0, vbSrcInvert
+    BitBlt myBackBuffer, 0, 0, 256, 256, sprites(14), 0, 0, vbSrcPaint
     BitBlt frmMain.pbCanvas.hdc, 0, 0, 256, 256, myBackBuffer, 0, 0, vbSrcCopy
 End Sub
 
@@ -206,7 +206,7 @@ Public Sub loadAllSprites()
     sprites(12) = LoadGraphicDC(112)
     sprites(13) = LoadGraphicDC(113)
     sprites(14) = LoadGraphicDC(200) ' This is our Game Over screen
-    sprites(14) = LoadGraphicDC(201) ' This is our Game Over mask
+    sprites(15) = LoadGraphicDC(201) ' This is our Game Over mask
     
 End Sub
 

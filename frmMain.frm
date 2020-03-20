@@ -137,7 +137,6 @@ Private Sub Form_Load()
     
     Call InitWindow
     Call InitGame
-    Call drawGameOver
 End Sub
 Private Sub InitWindow()
     ''' It appears that VB6 size units are tenth of pixels?

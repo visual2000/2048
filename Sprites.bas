@@ -162,7 +162,7 @@ Public Sub Animate(gameCells() As Integer, ByVal moves As Collection)
     
 End Sub
 
-Public Sub DrawBoard(gameCells() As Integer)
+Public Sub DrawBoard(gameCells() As Integer, gameOver As Boolean)
 
     Dim iRow As Integer, iCol As Integer
     
@@ -179,13 +179,15 @@ Public Sub DrawBoard(gameCells() As Integer)
     frmMain.pbCanvas.Cls
     BitBlt frmMain.pbCanvas.hdc, 0, 0, cellPx * frmMain.cells, _
            cellPx * frmMain.cells, myBackBuffer, 0, 0, vbSrcCopy
+    
+    If gameOver Then
+        ' Draw the Game Over message
+        BitBlt myBackBuffer, 0, 0, 256, 256, sprites(15), 0, 0, vbSrcAnd
+        BitBlt myBackBuffer, 0, 0, 256, 256, sprites(14), 0, 0, vbSrcPaint
+        BitBlt frmMain.pbCanvas.hdc, 0, 0, 256, 256, myBackBuffer, 0, 0, vbSrcCopy
+    End If
 End Sub
 
-Public Sub drawGameOver()
-    BitBlt myBackBuffer, 0, 0, 256, 256, sprites(15), 0, 0, vbSrcAnd
-    BitBlt myBackBuffer, 0, 0, 256, 256, sprites(14), 0, 0, vbSrcPaint
-    BitBlt frmMain.pbCanvas.hdc, 0, 0, 256, 256, myBackBuffer, 0, 0, vbSrcCopy
-End Sub
 
 Public Sub loadAllSprites()
 

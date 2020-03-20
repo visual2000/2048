@@ -125,7 +125,7 @@ Sub handleKey(KeyCode As Integer)
     End Select
     
     Call Animate(gameCells, dummy)
-    Call DrawBoard(gameCells)
+    Call DrawBoard(gameCells, False)
     Call UpdateScore
 End Sub
 
@@ -173,7 +173,7 @@ Private Sub InitGame()
     pbCanvas.Visible = True
     
     Call RandomlyPlace2Or4(gameCells)
-    Call DrawBoard(gameCells)
+    Call DrawBoard(gameCells, False)
     Call UpdateScore
 
 End Sub
@@ -208,8 +208,7 @@ Sub UpdateScore()
     If emptyCells = 0 Then
         Call addLog("there are 0 empty cells!")
         If Not NeighbouringTwins(gameCells) Then
-            Call addLog("------------- game over")
-            Call sprites.drawGameOver
+            Call DrawBoard(gameCells, True)
         End If
     End If
     
@@ -245,7 +244,7 @@ End Sub
 
 Private Sub mnuGameNew_Click()
     Call InitGame
-    Call DrawBoard(gameCells)
+    Call DrawBoard(gameCells, False)
 End Sub
 
 Private Sub pbCanvas_KeyUp(KeyCode As Integer, Shift As Integer)
@@ -257,11 +256,11 @@ End Sub
 Private Sub tAutoplay_Timer()
     Dim dummy As Collection
     Set dummy = GameStep(gameCells, Directions.Left)
-    Call DrawBoard(gameCells)
+    Call DrawBoard(gameCells, False)
     Call UpdateScore
 
     Set dummy = GameStep(gameCells, Directions.Up)
-    Call DrawBoard(gameCells)
+    Call DrawBoard(gameCells, False)
     Call UpdateScore
 
 End Sub

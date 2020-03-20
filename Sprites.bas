@@ -77,7 +77,34 @@ Private Function CellSpriteId(value As Integer) As Integer
     If value = 0 Then
         spriteId = 0
     Else
-        spriteId = Int(Math.log(value) / Math.log(2))
+        Select Case value
+        Case 2
+            spriteId = 1
+        Case 4
+            spriteId = 2
+        Case 8
+            spriteId = 3
+        Case 16
+            spriteId = 4
+        Case 32
+            spriteId = 5
+        Case 64
+            spriteId = 6
+        Case 128
+            spriteId = 7
+        Case 256
+            spriteId = 8
+        Case 512
+            spriteId = 9
+        Case 1024
+            spriteId = 10
+        Case 2048
+            spriteId = 11
+        Case 4096
+            spriteId = 12
+        Case 8192
+            spriteId = 13
+        End Select
     End If
 
     If spriteId >= 0 And spriteId <= UBound(sprites) Then
@@ -157,9 +184,6 @@ Public Sub Animate(gameCells() As Integer, ByVal moves As Collection)
             i = i + 1
         End If
     Loop
-    
-    
-    
 End Sub
 
 Public Sub DrawBoard(gameCells() As Integer, gameOver As Boolean)

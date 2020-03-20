@@ -57,13 +57,23 @@ Function GetEmptyCells(gameCells() As Integer) As Collection
     Set GetEmptyCells = empties
 End Function
 
-
-Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, stepX As Integer, stepY As Integer, startX As Integer, startY As Integer, endX As Integer, endY As Integer) As Boolean
+Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, stepX As Integer, stepY As Integer, startX As Integer, startY As Integer, endX As Integer, endY As Integer) As Collection
     
     Dim x As Integer, y As Integer
     Dim needToContinueLoop As Boolean
-    Dim weDidAnythingAtAll As Boolean
-    weDidAnythingAtAll = False
+    
+    Dim a As AnimationStep
+    Dim animationSteps As Collection
+    Set animationSteps = New Collection
+    
+    Dim gravityStartX As Integer
+    Dim gravityStartY As Integer
+    Dim gravityEndX As Integer
+    Dim gravityEndY As Integer
+    
+    Dim walk As Integer
+    
+    Dim fullCellFound As Boolean
     
     Do
         needToContinueLoop = False
@@ -72,14 +82,50 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
             'start at the given cell:
             For x = startX To endX Step stepX
                 If gameCells(x, y) = 0 Then
+                    gravityEndX = x
+                    gravityEndY = y
+                    fullCellFound = False
+                    
                     If x + dx >= 0 And y + dy >= 0 And x + dx <= UBound(gameCells) And y + dy <= UBound(gameCells) Then
-                    ' look at our neighbour - if they're non-empty, copy over.
-                        If Not gameCells(x + dx, y + dy) = 0 Then
-                            'copy across and blank them out!
-                            gameCells(x, y) = gameCells(x + dx, y + dy)
-                            gameCells(x + dx, y + dy) = 0
+                    
+                        If dx = 0 Then
+                            For walk = y + dy To endY Step stepY
+                                ' if we've walked to a cell that's full, record its position, jump out of the foor loop
+                                If gameCells(x, walk) > 0 Then
+                                    ' record it
+                                    gravityStartX = x
+                                    gravityStartY = walk
+                                    fullCellFound = True
+                                    Exit For
+                                End If
+                            Next walk
+                        End If
+                        
+                        If dy = 0 Then
+                            For walk = x + dx To endX Step stepX
+                                ' if we've walked to a cell that's full, record its position, jump out of the foor loop
+                                If gameCells(walk, y) > 0 Then
+                                    ' record it
+                                    gravityStartX = walk
+                                    gravityStartY = y
+                                    fullCellFound = True
+                                    Exit For
+                                End If
+                            Next walk
+                        End If
+                        
+                        If fullCellFound Then
+                            gameCells(gravityEndX, gravityEndY) = gameCells(gravityStartX, gravityStartY)
+                            gameCells(gravityStartX, gravityStartY) = 0
                             needToContinueLoop = True
-                            weDidAnythingAtAll = True
+                            ' Add to the list of proposed moves that goes back to the form
+                            Set a = New AnimationStep
+                            a.startX = gravityStartX
+                            a.startY = gravityStartY
+                            a.endX = gravityEndX
+                            a.endY = gravityEndY
+                            a.cellValue = gameCells(gravityEndX, gravityEndY)
+                            animationSteps.Add a
                         End If
                     End If
                 End If
@@ -88,14 +134,19 @@ Function ApplyGravity(gameCells() As Integer, dx As Integer, dy As Integer, step
         Next y
     Loop While needToContinueLoop
     
-    ApplyGravity = weDidAnythingAtAll
+    Set ApplyGravity = animationSteps
 End Function
 
-Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, stepX As Integer, stepY As Integer, startX As Integer, startY As Integer, endX As Integer, endY As Integer) As Boolean
+Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, _
+                     stepX As Integer, stepY As Integer, _
+                     startX As Integer, startY As Integer, _
+                     endX As Integer, endY As Integer) As Collection
+                     
     Dim x As Integer
     Dim y As Integer
-    Dim didWeMerge As Boolean
-    didWeMerge = False
+    Dim a As AnimationStep
+    Dim animationSteps As Collection
+    Set animationSteps = New Collection
     For y = startY To endY Step stepY ' each row
         For x = startX To endX Step stepX
             If Not gameCells(x, y) = 0 Then
@@ -106,15 +157,33 @@ Function ApplyMerges(gameCells() As Integer, dx As Integer, dy As Integer, stepX
                         gameCells(x, y) = gameCells(x, y) * 2
                         gameCells(x + dx, y + dy) = 0
                         ' apply gravity on the remainder of this row
-                        Call ApplyGravity(gameCells, dx, dy, stepX, stepY, x + dx, y + dy, endX, y + dy)
-                        didWeMerge = True
+                        Set animationSteps = appendCollection(animationSteps, ApplyGravity(gameCells, dx, dy, stepX, stepY, x + dx, y + dy, endX, y + dy))
+                        Set a = New AnimationStep
+                        a.startX = x + dx
+                        a.startY = y + dy
+                        a.endX = x
+                        a.endY = y
+                        a.amIaMerge = True
+                        a.cellValue = gameCells(x, y)
+                        animationSteps.Add a
                     End If
                 End If
             End If
             ' if the cell is empty, we're done, because that means the rest of the row is empty too (gravity)
         Next x
     Next y
-    ApplyMerges = didWeMerge
+    Set ApplyMerges = animationSteps
+End Function
+
+Function appendCollection(a As Collection, b As Collection) As Collection
+    Dim newCollection As Collection
+    Set newCollection = a
+    Dim thing As Object
+    For Each thing In b
+        newCollection.Add thing
+    Next thing
+    
+    Set appendCollection = newCollection
 End Function
 
 Function NeighbouringTwins(gameCells() As Integer) As Boolean
@@ -141,7 +210,7 @@ Function NeighbouringTwins(gameCells() As Integer) As Boolean
     NeighbouringTwins = areThereNeighbours
 End Function
 
-Sub GameStep(gameCells() As Integer, direction As Directions)
+Function GameStep(gameCells() As Integer, direction As Directions) As Collection
     Dim dx As Integer, dy As Integer
     Dim stepX As Integer, stepY As Integer
     Dim startX As Integer, startY As Integer
@@ -186,7 +255,7 @@ Sub GameStep(gameCells() As Integer, direction As Directions)
             endY = 0
         Case Else
             Call addLog("exiting because of unimplemented direction")
-            Exit Sub
+            Exit Function
     End Select
 
     If EmptyCellCount(gameCells) = 0 Then
@@ -195,18 +264,29 @@ Sub GameStep(gameCells() As Integer, direction As Directions)
             Call addLog("GameStep(): there are, however, valid moves left.")
         Else
             Call addLog("GameStep(): there are no valid moves left. Game over!")
-            Exit Sub
+            Set GameStep = New Collection
+            Exit Function
         End If
     End If
     
+    Dim animationSteps As Collection
+    
     Dim didGravityMove As Boolean, didMergeMove As Boolean
-    didGravityMove = ApplyGravity(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
-    didMergeMove = ApplyMerges(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
+    Set animationSteps = ApplyGravity(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
+    didGravityMove = animationSteps.Count > 0
+    
+    Dim mergeAnimationSteps As Collection
+    Set mergeAnimationSteps = ApplyMerges(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
+    didMergeMove = mergeAnimationSteps.Count > 0
+    
+    ' we want to do more moves below, potentially, so let's save these:
+    Set mergeAnimationSteps = appendCollection(mergeAnimationSteps, animationSteps)
+    Set animationSteps = New Collection
     
     If didMergeMove Or didGravityMove Or frmMain.mnuCheatAlwaysGive.Checked Then
+        Set animationSteps = ApplyGravity(gameCells, dx, dy, stepX, stepY, startX, startY, endX, endY)
         Call RandomlyPlace2Or4(gameCells)
     End If
     
-    Call frmMain.DrawTiles
-    Call frmMain.UpdateScore
-End Sub
+    Set GameStep = appendCollection(animationSteps, mergeAnimationSteps)
+End Function

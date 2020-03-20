@@ -181,13 +181,20 @@ Public Sub DrawBoard(gameCells() As Integer, gameOver As Boolean)
            cellPx * frmMain.cells, myBackBuffer, 0, 0, vbSrcCopy
     
     If gameOver Then
-        ' Draw the Game Over message
-        BitBlt myBackBuffer, 0, 0, 256, 256, sprites(15), 0, 0, vbSrcAnd
-        BitBlt myBackBuffer, 0, 0, 256, 256, sprites(14), 0, 0, vbSrcPaint
-        BitBlt frmMain.pbCanvas.hdc, 0, 0, 256, 256, myBackBuffer, 0, 0, vbSrcCopy
+        Call drawGameOver
     End If
 End Sub
 
+Public Sub drawGameOver()
+    Dim boardPx As Integer, msgOffset As Integer
+    ' Centre the Game Over message
+    boardPx = cellPx * frmMain.cells
+    msgOffset = (boardPx - 256) / 2
+    ' Draw the Game Over message
+    BitBlt myBackBuffer, msgOffset, msgOffset, 256, 256, sprites(15), 0, 0, vbSrcAnd
+    BitBlt myBackBuffer, msgOffset, msgOffset, 256, 256, sprites(14), 0, 0, vbSrcPaint
+    BitBlt frmMain.pbCanvas.hdc, 0, 0, boardPx, boardPx, myBackBuffer, 0, 0, vbSrcCopy
+End Sub
 
 Public Sub loadAllSprites()
 
